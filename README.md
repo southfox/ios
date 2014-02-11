@@ -36,6 +36,6 @@ Some categories I'm using for a long time:
 
 - Image save/load/delete
 
-    ./Categories/UIImage+BB.h
-    ./Categories/UIImage+BB.m
+    - ./Categories/UIImage+BB.h
+    - ./Categories/UIImage+BB.m
 
