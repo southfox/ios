@@ -1,0 +1,6 @@
+Build
+.DS_Store
+*.swp
+__MACOSX
+xcuserdata
+xcshareddata
