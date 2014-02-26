@@ -19,6 +19,7 @@
 @implementation HelloWorldScene
 {
     CCSprite *_player;
+    CCPhysicsNode *_physicsWorld;
 }
 
 // -----------------------------------------------------------------------
@@ -41,14 +42,28 @@
     // Enable touch handling on scene node
     self.userInteractionEnabled = YES;
     
+    [[OALSimpleAudio sharedInstance] playEffect:@"bell.mp3"];
+    
     // Create a colored background (Dark Grey)
     CCNodeColor *background = [CCNodeColor nodeWithColor:[CCColor colorWithRed:0.2f green:0.2f blue:0.2f alpha:1.0f]];
     [self addChild:background];
     
+    // physics simulation
+    _physicsWorld = [CCPhysicsNode node];
+    _physicsWorld.gravity = CGPointZero;
+//    _physicsWorld.debugDraw = YES;
+    _physicsWorld.collisionDelegate = self;
+    [self addChild:_physicsWorld];
+    
     // Add a sprite
     _player = [CCSprite spriteWithImageNamed:@"player.png"];
     _player.o  = ccp(_player.w/2,self.h/2);
-    [self addChild:_player];
+
+    // creates physics body
+    _player.physicsBody = [CCPhysicsBody bodyWithRect:_player.b cornerRadius:0];
+    // group for collisions
+    _player.physicsBody.collisionType = @"player";
+    [_physicsWorld addChild:_player];
     
     // Animate sprite with action
 //    CCActionRotateBy* actionSpin = [CCActionRotateBy actionWithDuration:1.5f angle:360];
@@ -87,6 +102,9 @@
     // Per frame update is automatically enabled, if update is overridden
     
     [self schedule:@selector(addMonster:) interval:1.5];
+    
+    [[OALSimpleAudio sharedInstance] playBg:@"beowulf.mp3" loop:YES];
+
 }
 
 // -----------------------------------------------------------------------
@@ -117,16 +135,21 @@
     // projectile sprite start at the same position as the player
     CCSprite *projectile = [CCSprite spriteWithImageNamed:@"projectile.png"];
     projectile.o = _player.o;
-    [self addChild:projectile];
+    // the circle is in the middle of the sprite
+    projectile.physicsBody = [CCPhysicsBody bodyWithCircleOfRadius:projectile.w/2 andCenter:projectile.anchorPointInPoints];
+    projectile.physicsBody.collisionType = @"projectile";
+    [_physicsWorld addChild:projectile];
+
     
     // target point for the projectile
     CCActionMoveTo *actionMove = [CCActionMoveTo actionWithDuration:1.5f position:targetPosition];
     CCActionRemove *actionRemove = [CCActionRemove action];
     [projectile runAction:[CCActionSequence actionWithArray:@[actionMove, actionRemove]]];
 
+    [[OALSimpleAudio sharedInstance] playEffect:@"shuriken.mp3"];
     // move the player
-    CCActionMoveTo *actionMovePlayer = [CCActionMoveTo actionWithDuration:1.0f position:ccp(_player.x, _player.y + offset.y / 2)];
-    [_player runAction:actionMovePlayer];
+//    CCActionMoveTo *actionMovePlayer = [CCActionMoveTo actionWithDuration:1.0f position:ccp(_player.x, _player.y + offset.y / 2)];
+//    [_player runAction:actionMovePlayer];
 }
 
 
@@ -161,8 +184,10 @@
     
     // monster slightly off the screen of the right
     monster.o = ccp(self.w + monster.w/2, randomY);
-    
-    [self addChild:monster];
+    monster.physicsBody = [CCPhysicsBody bodyWithCircleOfRadius:monster.w/2 andCenter:monster.anchorPointInPoints];
+    monster.physicsBody.collisionType = @"monster";
+    [_physicsWorld addChild:monster];
+
     
     int minDuration = 2.0;
     int maxDuration = 4.0;
@@ -176,5 +201,23 @@
     [monster runAction:[CCActionSequence actionWithArray:@[actionMove, actionRemove]]];
     
 }
+
+- (BOOL)ccPhysicsCollisionBegin:(CCPhysicsCollisionPair *)pair monster:(CCNode *)monster player:(CCNode *)player
+{
+    return YES;
+}
+
+
+
+- (BOOL)ccPhysicsCollisionBegin:(CCPhysicsCollisionPair *)pair monster:(CCNode *)monster projectile:(CCNode *)projectile
+{
+    [monster removeFromParent];
+    [projectile removeFromParent];
+    
+    [[OALSimpleAudio sharedInstance] playEffect:@"stab.mp3"];
+
+    return YES;
+}
+
 
 @end

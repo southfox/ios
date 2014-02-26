@@ -12,10 +12,6 @@
 /** Helper macro that creates a CGRect
  @return CGRect
  */
-static inline CGRect ccr( CGPoint o, CGSize s )
-{
-	return CGRectMake(o.x - s.width/2, o.y - s.height/2, s.width, s.height);
-}
 
 @implementation CCNode (HF)
 
@@ -82,9 +78,19 @@ static inline CGRect ccr( CGPoint o, CGSize s )
     self.contentSize = CGSizeMake(self.contentSize.width, h);
 }
 
+- (CGPoint)c;
+{
+    return (CGPoint){self.x - self.s.width/2, self.o.y - self.s.height/2};
+}
+
 - (CGRect)r;
 {
-    return ccr(self.o, self.s);
+    return (CGRect){self.c, self.s};
+}
+
+- (CGRect)b;
+{
+    return (CGRect){CGPointZero, self.s};
 }
 
 - (BOOL)contains:(CGPoint)p;

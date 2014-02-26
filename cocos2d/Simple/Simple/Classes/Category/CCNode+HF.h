@@ -17,6 +17,8 @@
 @property (nonatomic) CGFloat w;
 @property (nonatomic) CGFloat h;
 
+- (CGRect)r; // rect
+- (CGRect)b; // bounds
 - (BOOL)contains:(CGPoint)p;
 
 @end
